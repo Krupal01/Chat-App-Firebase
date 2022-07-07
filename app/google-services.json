@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "178553088814",
+    "project_id": "fir-chat-b4aa3",
+    "storage_bucket": "fir-chat-b4aa3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178553088814:android:febf0082a03305321c28bf",
+        "android_client_info": {
+          "package_name": "com.example.jetpack_chat_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178553088814-r6posdrr83nh2buk04m3ht91k0g4o9p9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3P5nNmMFpBHqDqmge_wrykvcr7nwzOn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178553088814-r6posdrr83nh2buk04m3ht91k0g4o9p9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
