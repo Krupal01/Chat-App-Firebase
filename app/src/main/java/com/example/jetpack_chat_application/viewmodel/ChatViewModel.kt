@@ -1,22 +1,24 @@
 package com.example.jetpack_chat_application.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.jetpack_chat_application.model.MainUserModel
+import com.example.jetpack_chat_application.model.MessageModel
 import com.example.jetpack_chat_application.repository.UserRepository
 import com.example.jetpack_chat_application.utils.TAG
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val firebaseDatabase: FirebaseDatabase,
+    private val firebaseStorage: FirebaseStorage,
     private val userRepository: UserRepository
     ) : ViewModel() {
 
@@ -29,8 +31,13 @@ class ChatViewModel @Inject constructor(
     private val _user = MutableLiveData<String>()
     val userName : LiveData<String> = _user
 
-    private val _chatMessage = mutableStateListOf<String>()
-    val chatMessage : List<String> = _chatMessage
+    private val _chatMessage = mutableStateListOf<MessageModel>()
+    val chatMessage : List<MessageModel> = _chatMessage
+
+    var _photoAttachmentUri = MutableLiveData<Uri?>()
+    val photoAttachmentUri  = _photoAttachmentUri as  LiveData<Uri?>
+
+    var imageUrl : String? = null
 
     init {
 
@@ -99,10 +106,12 @@ class ChatViewModel @Inject constructor(
             override fun onDataChange(snapshot: DataSnapshot) {
                 _chatMessage.clear()
                 for (data in snapshot.children){
-                    if (data.value.toString().isNotEmpty()){
-                        _chatMessage.add(data.value!!.toString())
+                    if (data.hasChild("image")){
+                        _chatMessage.add(MessageModel(msg = null , imageUrl = data.child("image").value.toString()))
                     }else{
-                        Log.i(TAG,"No data found ${data.key}")
+                        if (data.value.toString().isNotEmpty()){
+                            _chatMessage.add(MessageModel(msg = data.value!!.toString() , imageUrl = null))
+                        }
                     }
                 }
             }
@@ -116,6 +125,32 @@ class ChatViewModel @Inject constructor(
 
     fun sendMessage(key: String , msg : String){
         firebaseDatabase.getReference("message").child(key).push().setValue(msg)
+    }
+
+    fun uploadImage(key: String){
+        if (_photoAttachmentUri!=null){
+            val filename = UUID.randomUUID().toString()
+            val ref = firebaseStorage.getReference("$key/images/$filename")
+            ref.putFile(_photoAttachmentUri.value!!)
+                .addOnSuccessListener {
+                    ref.downloadUrl.addOnSuccessListener {
+                        imageUrl = it.toString()
+                        firebaseDatabase.getReference("message")
+                            .child(key)
+                            .push()
+                            .child("image")
+                            .setValue(imageUrl)
+                            .addOnSuccessListener {
+                                imageUrl = null
+                                _photoAttachmentUri.value = null
+                                Log.i("$TAG viewmodelphoto",photoAttachmentUri.value.toString())
+                            }
+
+                    }
+                }
+        }else{
+            return
+        }
     }
 
 }

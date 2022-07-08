@@ -1,6 +1,7 @@
 package com.example.jetpack_chat_application.module
 
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +16,12 @@ class FireBaseModule {
     @Singleton
     fun getFirebaseInstant(): FirebaseDatabase {
         return FirebaseDatabase.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun getFireBaseStorageInstant():FirebaseStorage{
+        return FirebaseStorage.getInstance()
     }
 
 }
